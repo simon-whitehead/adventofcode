@@ -49,11 +49,18 @@ fn generate_checksum<S>(input: S) -> u32
 }
 
 fn get_largest_difference(numbers: &[u32]) -> u32 {
-    let mut n = vec![0; numbers.len()];
-    n.copy_from_slice(numbers);
-    n.sort_by(|a, b| a.cmp(b));
-    let a = n.first().unwrap_or(&0);
-    let b = n.last().unwrap_or(&0);
+    let mut a = numbers[0];
+    let mut b = numbers[0];
+
+    for n in numbers {
+        if *n < a {
+            a = *n;
+        }
+
+        if *n > b {
+            b = *n;
+        }
+    }
 
     b - a
 }
