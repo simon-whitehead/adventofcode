@@ -26,22 +26,27 @@ fn main() {
 151	3473	1435	87	1517	1480	140	2353	1293	118	163	3321	2537	3061	1532	3402
 127	375	330	257	220	295	145	335	304	165	151	141	289	256	195	272";
 
-    let checksum = generate_checksum(input);
+    let part1_checksum = generate_checksum(input, get_largest_difference);
 
-    println!("The checksum is: {}", checksum);
+    println!("The checksum for part 1 is: {}", part1_checksum);
+
+    let part2_checksum = generate_checksum(input, get_evenly_divisible);
+
+    println!("The checksum for part 2 is: {}", part2_checksum);
 }
 
 named!(parse_line<Vec<u32>>,
        many0!(map_res!(map_res!(ws!(digit), str::from_utf8), FromStr::from_str)));
 
-fn generate_checksum<S>(input: S) -> u32
-    where S: Into<String>
+fn generate_checksum<S, F>(input: S, op: F) -> u32
+    where S: Into<String>,
+          F: Fn(&[u32]) -> u32
 {
     let input: String = input.into();
     let mut sum = 0;
     for line in input.lines() {
         if let IResult::Done(_, numbers) = parse_line(line.as_bytes()) {
-            sum += get_largest_difference(&numbers);
+            sum += op(&numbers);
         }
     }
 
@@ -65,15 +70,38 @@ fn get_largest_difference(numbers: &[u32]) -> u32 {
     b - a
 }
 
+fn get_evenly_divisible(numbers: &[u32]) -> u32 {
+    for a in numbers {
+        for b in numbers {
+            if *a != *b && *a % *b == 0 {
+                return *a / *b;
+            }
+        }
+    }
+
+    0
+}
+
 #[test]
-fn day2_tests() {
+fn day2_part1_test() {
     let input = r"5 1 9 5
 7 5 3
 2 4 6 8";
 
-    let sum = generate_checksum(input);
+    let sum = generate_checksum(input, get_largest_difference);
 
     assert_eq!(18, sum);
+}
+
+#[test]
+fn day2_part2_test() {
+    let input = r"5 9 2 8
+9 4 7 3
+3 8 6 5";
+
+    let sum = generate_checksum(input, get_evenly_divisible);
+
+    assert_eq!(9, sum);
 }
 
 #[test]
